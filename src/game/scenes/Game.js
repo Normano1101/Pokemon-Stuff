@@ -162,10 +162,10 @@ export class Game extends Scene {
             this.currentSongKey = null;
             const cam = this.cameras.main;
             // Place the UI on the left side of the viewport
-            const buttonWidth = 380;
-            const buttonHeight = 40;
-            const iconButtonWidth = 30;
-            const buttonSpacing = 6;
+            const buttonWidth = 570;
+            const buttonHeight = 60;
+            const iconButtonWidth = 45;
+            const buttonSpacing = 9;
             const buttonX = cam.worldView.x + 20;
             const buttonY = cam.worldView.y + 20;
 
@@ -175,9 +175,9 @@ export class Game extends Scene {
                 .setScrollFactor(0)
                 .setDepth(10);
 
-            const buttonLabel = this.add.text(buttonX + 12, buttonY + 10, `Play ${songNames[currentSongIndex]}`, {
+            const buttonLabel = this.add.text(buttonX + 18, buttonY + 15, `Play ${songNames[currentSongIndex]}`, {
                 fontFamily: 'Arial',
-                fontSize: '18px',
+                fontSize: '27px',
                 color: '#ffffff'
             }).setScrollFactor(0)
                 .setDepth(11);
@@ -187,53 +187,53 @@ export class Game extends Scene {
             const pauseButtonX = playButtonX + iconButtonWidth + buttonSpacing;
             const rightButtonX = pauseButtonX + iconButtonWidth + buttonSpacing;
 
-            const labelWidth = leftButtonX - (buttonX + 12) - 4;
+            const labelWidth = leftButtonX - (buttonX + 18) - 6;
             buttonLabel.setFixedSize(labelWidth, buttonHeight).setAlign('left');
 
-            const leftButton = this.add.rectangle(leftButtonX, buttonY + 8, iconButtonWidth, 24, 0x444444, 1)
+            const leftButton = this.add.rectangle(leftButtonX, buttonY + 12, iconButtonWidth, 36, 0x444444, 1)
                 .setOrigin(0, 0)
                 .setScrollFactor(0)
                 .setDepth(11)
                 .setInteractive({ useHandCursor: true });
-            const leftText = this.add.text(leftButtonX + 8, buttonY + 12, '<', {
+            const leftText = this.add.text(leftButtonX + 12, buttonY + 18, '<', {
                 fontFamily: 'Arial',
-                fontSize: '16px',
+                fontSize: '24px',
                 color: '#ffffff'
             }).setScrollFactor(0)
                 .setDepth(12);
 
-            const playButton = this.add.rectangle(playButtonX, buttonY + 8, iconButtonWidth, 24, 0x444444, 1)
+            const playButton = this.add.rectangle(playButtonX, buttonY + 12, iconButtonWidth, 36, 0x444444, 1)
                 .setOrigin(0, 0)
                 .setScrollFactor(0)
                 .setDepth(11)
                 .setInteractive({ useHandCursor: true });
-            const playText = this.add.text(playButtonX + 6, buttonY + 12, '▶', {
+            const playText = this.add.text(playButtonX + 9, buttonY + 18, '▶', {
                 fontFamily: 'Arial',
-                fontSize: '14px',
+                fontSize: '21px',
                 color: '#ffffff'
             }).setScrollFactor(0)
                 .setDepth(12);
 
-            const pauseButton = this.add.rectangle(pauseButtonX, buttonY + 8, iconButtonWidth, 24, 0x444444, 1)
+            const pauseButton = this.add.rectangle(pauseButtonX, buttonY + 12, iconButtonWidth, 36, 0x444444, 1)
                 .setOrigin(0, 0)
                 .setScrollFactor(0)
                 .setDepth(11)
                 .setInteractive({ useHandCursor: true });
-            const pauseText = this.add.text(pauseButtonX + 8, buttonY + 12, '||', {
+            const pauseText = this.add.text(pauseButtonX + 12, buttonY + 18, '||', {
                 fontFamily: 'Arial',
-                fontSize: '14px',
+                fontSize: '21px',
                 color: '#ffffff'
             }).setScrollFactor(0)
                 .setDepth(12);
 
-            const rightButton = this.add.rectangle(rightButtonX, buttonY + 8, iconButtonWidth, 24, 0x444444, 1)
+            const rightButton = this.add.rectangle(rightButtonX, buttonY + 12, iconButtonWidth, 36, 0x444444, 1)
                 .setOrigin(0, 0)
                 .setScrollFactor(0)
                 .setDepth(11)
                 .setInteractive({ useHandCursor: true });
-            const rightText = this.add.text(rightButtonX + 8, buttonY + 12, '>', {
+            const rightText = this.add.text(rightButtonX + 12, buttonY + 18, '>', {
                 fontFamily: 'Arial',
-                fontSize: '16px',
+                fontSize: '24px',
                 color: '#ffffff'
             }).setScrollFactor(0)
                 .setDepth(12);
