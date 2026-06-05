@@ -33,6 +33,11 @@ export class Game extends Scene {
             frameWidth: 64,
             frameHeight: 64
         });
+
+        // Audio songs loaded from public/assets/songs
+        this.load.audio('song-1', 'assets/songs/Completely Beloved Every Dearly Beloved At Once.mp3');
+        this.load.audio('song-2', 'assets/songs/The Stranglers - Golden Brown SLOWED BEST PART LOOPED.mp3');
+        this.load.audio('song-3', 'assets/songs/Young beautiful but its only the best part..mp3');
     }
 
     create() {
@@ -54,6 +59,25 @@ export class Game extends Scene {
 
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.cameras.main.centerOn(map.widthInPixels / 2, map.heightInPixels / 2);
+
+        const captionText = 'OUR FUTURE WEDDING :)';
+        const cam = this.cameras.main;
+        const captionX = cam.width / 2;
+        const captionY = cam.height - 60;
+        const captionBg = this.add.rectangle(captionX, captionY, 520, 60, 0x000000, 0.55)
+            .setOrigin(0.5)
+            .setScrollFactor(0)
+            .setDepth(3001);
+        const caption = this.add.text(captionX, captionY, captionText, {
+            fontFamily: 'Arial',
+            fontSize: '20px',
+            color: '#ffffff',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 4
+        }).setOrigin(0.5)
+            .setScrollFactor(0)
+            .setDepth(3002);
 
         const tileSize = 32;
         this.tileSize = tileSize;
@@ -117,15 +141,31 @@ export class Game extends Scene {
         }).setScrollFactor(0).setDepth(3000);
 
         if (this.showSongUI) {
-            // Song button UI (visual only for now)
-            const songNames = ['Garden Song', 'Evening Song', 'Mystic Song'];
+            // Song button UI with real song files from public/assets/songs
+            const songs = [
+                {
+                    key: 'song-1',
+                    title: 'Completely Beloved Every Dearly Beloved At Once'
+                },
+                {
+                    key: 'song-2',
+                    title: 'The Stranglers - Golden Brown SLOWED BEST PART LOOPED'
+                },
+                {
+                    key: 'song-3',
+                    title: 'Young beautiful but its only the best part..'
+                }
+            ];
+            const songNames = songs.map((song) => song.title);
             let currentSongIndex = 0;
+            this.currentSong = null;
+            this.currentSongKey = null;
             const cam = this.cameras.main;
             // Place the UI on the left side of the viewport
-            const buttonWidth = 360;
+            const buttonWidth = 380;
             const buttonHeight = 40;
             const iconButtonWidth = 30;
-            const buttonSpacing = 8;
+            const buttonSpacing = 6;
             const buttonX = cam.worldView.x + 20;
             const buttonY = cam.worldView.y + 20;
 
@@ -142,9 +182,13 @@ export class Game extends Scene {
             }).setScrollFactor(0)
                 .setDepth(11);
 
-            const leftButtonX = buttonX + buttonWidth - iconButtonWidth * 3 - buttonSpacing * 2;
+            const leftButtonX = buttonX + buttonWidth - iconButtonWidth * 4 - buttonSpacing * 3;
             const playButtonX = leftButtonX + iconButtonWidth + buttonSpacing;
-            const rightButtonX = playButtonX + iconButtonWidth + buttonSpacing;
+            const pauseButtonX = playButtonX + iconButtonWidth + buttonSpacing;
+            const rightButtonX = pauseButtonX + iconButtonWidth + buttonSpacing;
+
+            const labelWidth = leftButtonX - (buttonX + 12) - 4;
+            buttonLabel.setFixedSize(labelWidth, buttonHeight).setAlign('left');
 
             const leftButton = this.add.rectangle(leftButtonX, buttonY + 8, iconButtonWidth, 24, 0x444444, 1)
                 .setOrigin(0, 0)
@@ -170,6 +214,18 @@ export class Game extends Scene {
             }).setScrollFactor(0)
                 .setDepth(12);
 
+            const pauseButton = this.add.rectangle(pauseButtonX, buttonY + 8, iconButtonWidth, 24, 0x444444, 1)
+                .setOrigin(0, 0)
+                .setScrollFactor(0)
+                .setDepth(11)
+                .setInteractive({ useHandCursor: true });
+            const pauseText = this.add.text(pauseButtonX + 8, buttonY + 12, '||', {
+                fontFamily: 'Arial',
+                fontSize: '14px',
+                color: '#ffffff'
+            }).setScrollFactor(0)
+                .setDepth(12);
+
             const rightButton = this.add.rectangle(rightButtonX, buttonY + 8, iconButtonWidth, 24, 0x444444, 1)
                 .setOrigin(0, 0)
                 .setScrollFactor(0)
@@ -182,15 +238,52 @@ export class Game extends Scene {
             }).setScrollFactor(0)
                 .setDepth(12);
 
+            const stopSong = () => {
+                if (this.currentSong && this.currentSong.isPlaying) {
+                    this.currentSong.stop();
+                }
+                this.currentSong = null;
+                this.currentSongKey = null;
+                updateSongLabel();
+            };
+
+            const playSelectedSong = () => {
+                stopSong();
+                const song = songs[currentSongIndex];
+                if (!song) return;
+                this.currentSong = this.sound.add(song.key, { loop: true, volume: 0.5 });
+                this.currentSong.play();
+                this.currentSongKey = song.key;
+                buttonLabel.setText(`Playing ${song.title}`);
+            };
+
+            const startSongAndPatrol = () => {
+                if (this.patrolActive) return;
+                playSelectedSong();
+                this.patrolActive = true;
+                this.startPatrol(waypoints);
+            };
+
+            const pausePlayback = async () => {
+                if (this.patrolActive) {
+                    await this.stopPatrol();
+                    this.patrolActive = false;
+                }
+                stopSong();
+            };
+
             const updateSongLabel = () => {
-                buttonLabel.setText(`Play ${songNames[currentSongIndex]}`);
+                const selectedLabel = `Play ${songNames[currentSongIndex]}`;
+                const playingLabel = `Playing ${songNames[currentSongIndex]}`;
+                if (this.currentSong && this.currentSong.isPlaying && this.currentSongKey === songs[currentSongIndex].key) {
+                    buttonLabel.setText(playingLabel);
+                } else {
+                    buttonLabel.setText(selectedLabel);
+                }
             };
 
             buttonBg.on('pointerover', () => buttonBg.setFillStyle(0x444444, 1));
             buttonBg.on('pointerout', () => buttonBg.setFillStyle(0x222222, 0.95));
-            buttonBg.on('pointerdown', () => {
-                // TODO: play the song and start the garden rotation animation
-            });
 
             leftButton.on('pointerdown', () => {
                 currentSongIndex = (currentSongIndex - 1 + songNames.length) % songNames.length;
@@ -198,7 +291,11 @@ export class Game extends Scene {
             });
 
             playButton.on('pointerdown', () => {
-                // TODO: play the selected song now
+                startSongAndPatrol();
+            });
+
+            pauseButton.on('pointerdown', () => {
+                pausePlayback();
             });
 
             rightButton.on('pointerdown', () => {
@@ -210,6 +307,8 @@ export class Game extends Scene {
             leftButton.on('pointerout', () => leftButton.setFillStyle(0x444444, 1));
             playButton.on('pointerover', () => playButton.setFillStyle(0x666666, 1));
             playButton.on('pointerout', () => playButton.setFillStyle(0x444444, 1));
+            pauseButton.on('pointerover', () => pauseButton.setFillStyle(0x666666, 1));
+            pauseButton.on('pointerout', () => pauseButton.setFillStyle(0x444444, 1));
             rightButton.on('pointerover', () => rightButton.setFillStyle(0x666666, 1));
             rightButton.on('pointerout', () => rightButton.setFillStyle(0x444444, 1));
             // Ensure UI renders above all game layers and sprites
@@ -219,6 +318,8 @@ export class Game extends Scene {
             leftText.setDepth(1002);
             playButton.setDepth(1001);
             playText.setDepth(1002);
+            pauseButton.setDepth(1001);
+            pauseText.setDepth(1002);
             rightButton.setDepth(1001);
             rightText.setDepth(1002);
 
@@ -229,6 +330,8 @@ export class Game extends Scene {
             this.children.bringToTop(leftText);
             this.children.bringToTop(playButton);
             this.children.bringToTop(playText);
+            this.children.bringToTop(pauseButton);
+            this.children.bringToTop(pauseText);
             this.children.bringToTop(rightButton);
             this.children.bringToTop(rightText);
 
@@ -249,17 +352,6 @@ export class Game extends Scene {
                 .setScrollFactor(0)
                 .setDepth(2001);
             this.children.bringToTop(debugMarker);
-            // --- Patrol button and logic ---
-            const patrolButtonX = cam.worldView.x + 20;
-            const patrolButtonY = buttonY + buttonHeight + 12;
-            const patrolBg = this.add.rectangle(patrolButtonX, patrolButtonY, 140, 30, 0x225522, 1)
-                .setOrigin(0, 0)
-                .setScrollFactor(0)
-                .setDepth(1000)
-                .setInteractive({ useHandCursor: true });
-            const patrolText = this.add.text(patrolButtonX + 12, patrolButtonY + 6, 'Start Patrol', {
-                fontFamily: 'Arial', fontSize: '14px', color: '#ffffff'
-            }).setScrollFactor(0).setDepth(1001);
 
             this.patrolActive = false;
 
@@ -270,16 +362,6 @@ export class Game extends Scene {
                 // return to spawn (use original tile positions)
                 [{ x: this.mimikyu.tileX, y: this.mimikyu.tileY }, { x: this.dragonite.tileX, y: this.dragonite.tileY }]
             ];
-
-            patrolBg.on('pointerdown', async () => {
-                this.patrolActive = !this.patrolActive;
-                patrolText.setText(this.patrolActive ? 'Stop Patrol' : 'Start Patrol');
-                if (this.patrolActive) {
-                    this.startPatrol(waypoints);
-                } else {
-                    await this.stopPatrol();
-                }
-            });
         }
     }
 
