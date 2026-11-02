@@ -1,14 +1,11 @@
 import { Scene } from 'phaser';
 
-export class MainMenu extends Scene
-{
-    constructor ()
-    {
+export class MainMenu extends Scene {
+    constructor() {
         super('MainMenu');
     }
 
-    create ()
-    {
+    create() {
         this.add.image(0, 0, 'background')
             .setOrigin(0, 0)
             .setDisplaySize(this.scale.width, this.scale.height);
@@ -26,8 +23,6 @@ export class MainMenu extends Scene
         }).setOrigin(0.5);
 
         this.input.once('pointerdown', () => {
-            // Mark registry so Game can read this even if scenes/states change
-            this.registry.set('showSongUI', true);
             this.scene.start('Game', { showSongUI: true });
         });
     }
