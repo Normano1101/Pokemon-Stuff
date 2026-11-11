@@ -6,6 +6,7 @@ import { CANVAS, Game as PhaserGame, Scale } from 'phaser';
 const config = {
     // The full tileset exceeds WebGL texture limits on some browsers.
     type: CANVAS,
+    pixelArt: true, // keep pixel art crisp when scaled
     width: 1024,
     height: 768,
     scale: {
